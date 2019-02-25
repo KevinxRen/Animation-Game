@@ -28,15 +28,12 @@ class GameViewController: UIViewController {
                 
                 // Set the scale mode to scale to fit the window
                 sceneNode.scaleMode = .aspectFill
+                sceneNode.size = self.view.bounds.size
                 
                 // Present the scene
                 if let view = self.view as! SKView? {
                     view.presentScene(sceneNode)
-                    
-                    view.ignoresSiblingOrder = true
-                    
-                    view.showsFPS = true
-                    view.showsNodeCount = true
+
                 }
             }
         }
@@ -48,31 +45,14 @@ class GameViewController: UIViewController {
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         if UIDevice.current.userInterfaceIdiom == .phone {
-            return .allButUpsideDown
+            return .portrait
         } else {
-            return .all
+            return .portrait
         }
     }
 
     override var prefersStatusBarHidden: Bool {
         return true
     }
-    
-    class Gamelogic : UIViewController, GamelogicProtocol {
-        //Setting up the game board
-        var dimension: Int
-        var threshold: Int
-        
-        init(dimension d: Int, threshold t: Int) {
-            dimension = d > 2 ? d : 2
-            threshold = t > 8 ? t : 8
-            super.init(nibName: nil, bundle: nil)
-            model = GameModel(dimension: dimension, threshold: threshold, delegate: self)
-            view.backgroundColor = UIColor.white
-            setupSwipeControls()
-        }
-        
-        required init(coder aDecoder: NSCoder) {
-            fatalError("NSCoding not supported")
-        }
+
 }
