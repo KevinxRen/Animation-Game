@@ -57,4 +57,22 @@ class GameViewController: UIViewController {
     override var prefersStatusBarHidden: Bool {
         return true
     }
+    
+    class Gamelogic : UIViewController, GamelogicProtocol {
+        //Setting up the game board
+        var dimension: Int
+        var threshold: Int
+        
+        init(dimension d: Int, threshold t: Int) {
+            dimension = d > 2 ? d : 2
+            threshold = t > 8 ? t : 8
+            super.init(nibName: nil, bundle: nil)
+            model = GameModel(dimension: dimension, threshold: threshold, delegate: self)
+            view.backgroundColor = UIColor.white
+            setupSwipeControls()
+        }
+        
+        required init(coder aDecoder: NSCoder) {
+            fatalError("NSCoding not supported")
+        }
 }
