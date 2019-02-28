@@ -146,7 +146,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate{
         self.addChild(endGround)
         
         //Display Score
-        scoreDisplay.text = "Score = 0"
+        scoreDisplay.text = "Score = 1"
         scoreDisplay.color = .black
         scoreDisplay.colorBlendFactor = 1
         scoreDisplay.position = CGPoint(x: self.frame.width / 2, y: self.frame.height * 3 / 4)
