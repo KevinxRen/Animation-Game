@@ -38,7 +38,7 @@ struct GameConstants{
 
 class GameScene: SKScene, SKPhysicsContactDelegate{
     
-    var grids = true
+    var grids = false
     
     var bg = SKSpriteNode(imageNamed: "bg")
     var hoop = SKSpriteNode(imageNamed: "hoop")
@@ -50,7 +50,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate{
     var startGround = SKShapeNode() // Where the balls starts from
     var endGround = SKShapeNode() //Where the ball will stop/bounce
     
-    var pi = Double.pi
     var score = CGFloat()
     var scoreDisplay = SKLabelNode()
 
@@ -145,13 +144,80 @@ class GameScene: SKScene, SKPhysicsContactDelegate{
         endGround.physicsBody?.isDynamic = false
         
         self.addChild(endGround)
-
         
+        //Display Score
+        scoreDisplay.text = "Score = 0"
+        scoreDisplay.color = .black
+        scoreDisplay.colorBlendFactor = 1
+        scoreDisplay.position = CGPoint(x: self.frame.width / 2, y: self.frame.height * 3 / 4)
+        scoreDisplay.zPosition = bg.zPosition + 1
         
+        self.addChild(scoreDisplay)
+        
+        setScore()
+        setBall()
         
     }
     
-    func shootBall(){
+    func setScore(){
         
+    }
+    
+    func setBall(){
+        basketball.removeFromParent()
+        ball.removeFromParent()
+        
+        ball.setScale(1)
+    
+        
+        ball = SKShapeNode(circleOfRadius: hoop.frame.width / 1.5)
+        ball.fillColor = grids ? .red : .clear
+        ball.strokeColor = .clear
+        ball.position = CGPoint(x: self.frame.width / 2, y: startGround.position.y + ball.frame.height)
+        ball.zPosition = 10
+        
+        //basketball.size = ball.frame.size
+        let ballScale = CGFloat(ball.frame.width / ball.frame.height)
+        basketball.size.height = self.frame.height / 6.5
+        basketball.size.width = basketball.size.height * ballScale
+        ball.addChild(basketball)
+        
+        ball.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "ball"), size: basketball.size)
+        ball.physicsBody?.categoryBitMask = Physics.ball
+        ball.physicsBody?.collisionBitMask = Physics.sg
+        ball.physicsBody?.contactTestBitMask = Physics.eg
+        ball.physicsBody?.affectedByGravity = true
+        ball.physicsBody?.isDynamic = true
+        
+        self.addChild(ball)
+    }
+    
+    func shootBall(){
+        let xCoor = TouchPoints.end.x - TouchPoints.start.x
+        
+        let angle = (atan(xCoor / (TouchPoints.end.y - TouchPoints.start.y)) * 180 / 3.1415)
+        let fixAngle = (tan(angle * 3.1415 / 180) * GameConstants.YVel)
+        
+        //Throw
+        let throwAction = CGVector(dx: fixAngle, dy:GameConstants.YVel)
+        ball.physicsBody?.applyImpulse(throwAction, at: TouchPoints.start)
+        
+        ball.run(SKAction.scale(by: 0.3, duration: GameConstants.AirTime))
+        
+        //Collision
+        let inAir = SKAction.wait(forDuration: GameConstants.AirTime / 2)
+        let detectCollision = SKAction.run({
+            self.ball.physicsBody?.collisionBitMask = Physics.sg | Physics.eg
+            self.ball.zPosition = self.bg.zPosition + 2
+            
+        })
+        
+        //Rest
+        let resetCounter = SKAction.wait(forDuration: 4)
+        let reset = SKAction.run({
+            self.setBall()
+        })
+        
+        self.run(SKAction.sequence([resetCounter,reset]))
     }
 }
