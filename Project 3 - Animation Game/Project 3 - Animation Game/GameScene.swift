@@ -21,8 +21,8 @@ struct Physics{
     static let leftHoop: UInt32 = 0x1 << 2
     static let rightHoop: UInt32 = 0x1 << 3
     //static let floor: UInt32 = 0x1 << 4
-    static let startGround: UInt32 = 0x1 << 4
-    static let endGround: UInt32 = 0x1 << 5
+    static let sg: UInt32 = 0x1 << 4
+    static let eg: UInt32 = 0x1 << 5
 }
 
 struct TouchPoints{
@@ -51,7 +51,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate{
     var endGround = SKShapeNode() //Where the ball will stop/bounce
     
     var pi = Double.pi
-    var wind = CGFloat()
+    var score = CGFloat()
+    var scoreDisplay = SKLabelNode()
 
     
     override func didMove(to view: SKView) {
@@ -92,14 +93,60 @@ class GameScene: SKScene, SKPhysicsContactDelegate{
     func runGame(){
         GameState.current = .playing
         
+        //Display the Background
         let bgScale = CGFloat(bg.frame.width / bg.frame.height)
-        
         bg.size.height = self.frame.height
         bg.size.width = bg.size.height * bgScale
         bg.position = CGPoint(x: self.frame.width / 2, y: self.frame.height / 2)
         bg.zPosition = 0
         
         self.addChild(bg)
+        
+        //Display the hoop
+        let hoopScale = CGFloat(hoop.frame.width / hoop.frame.height)
+        hoop.size.height = self.frame.height / 3
+        hoop.size.width = hoop.size.height * hoopScale
+        hoop.position = CGPoint(x: self.frame.width / 2, y: self.frame.height / 1.5)
+        hoop.zPosition = bg.zPosition + 1
+        
+        self.addChild(hoop)
+        
+        
+        //Physics of the start ground
+        startGround = SKShapeNode(rectOf: CGSize(width: self.frame.width, height: 5))
+        startGround.fillColor = .blue
+        startGround.strokeColor = .clear
+        startGround.position = CGPoint(x: self.frame.width / 2, y: self.frame.height / 10)
+        startGround.zPosition = 10
+        startGround.alpha = grids ? 1 : 0
+        
+        startGround.physicsBody = SKPhysicsBody(rectangleOf: startGround.frame.size)
+        startGround.physicsBody?.categoryBitMask = Physics.sg
+        startGround.physicsBody?.collisionBitMask = Physics.ball
+        startGround.physicsBody?.contactTestBitMask = Physics.none
+        startGround.physicsBody?.affectedByGravity = false
+        startGround.physicsBody?.isDynamic = false
+        
+        self.addChild(startGround)
+        
+        // Physics of end ground
+        endGround = SKShapeNode(rectOf: CGSize(width: self.frame.width * 2, height: 5))
+        endGround.fillColor = .blue
+        endGround.strokeColor = .clear
+        endGround.position = CGPoint(x: self.frame.width / 2, y: self.frame.height / 1.5 - hoop.frame.height / 2)
+        endGround.zPosition = 10
+        endGround.alpha = grids ? 1 : 0
+        
+        endGround.physicsBody = SKPhysicsBody(rectangleOf: startGround.frame.size)
+        endGround.physicsBody?.categoryBitMask = Physics.eg
+        endGround.physicsBody?.collisionBitMask = Physics.ball
+        endGround.physicsBody?.contactTestBitMask = Physics.none
+        endGround.physicsBody?.affectedByGravity = false
+        endGround.physicsBody?.isDynamic = false
+        
+        self.addChild(endGround)
+
+        
         
         
     }
